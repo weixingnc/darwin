@@ -77,6 +77,9 @@
 - [x] **EvolutionEngine 集成 Sandbox 流程** — 所有进化必须经过沙箱验证
 - [x] **新增沙箱阶段** — SNAPSHOT → SANDBOX_CREATE → SANDBOX_TEST → SANDBOX_PROMOTE → EVALUATE → COMMIT
 - [x] **简化模式** — `execute_simple()` 跳过沙箱（仅紧急修复或 creator 授权时使用）
+- [x] **PerceptionModule** — 感知外部环境和主人沟通
+- [x] **AnalyzerModule** — 分析感知，生成进化计划
+- [x] **DarwinCore** — 整合感知→分析→进化的核心循环
 
 ---
 
