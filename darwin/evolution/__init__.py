@@ -8,6 +8,9 @@ from .soul_editor import SoulEditor, SoulProposal, SoulChange, ConsistencyReport
 from .skill_builder import SkillBuilder, SkillProposal, SkillSpec
 from .auto_tuner import AutoTuner, RuntimeMetrics, ParameterAdjustment, TUNABLE_PARAMS
 from .bug_fixer import BugFixer, BugReport, FixAttempt
+from .sandbox_manager import SandboxManager, SandboxInfo
+from .test_runner import TestRunner, TestResult
+from .promoter import Promoter, PromotionResult
 
 __all__ = [
     # Core
@@ -37,4 +40,11 @@ __all__ = [
     "BugFixer",
     "BugReport",
     "FixAttempt",
+    # Sandbox
+    "SandboxManager",
+    "SandboxInfo",
+    "TestRunner",
+    "TestResult",
+    "Promoter",
+    "PromotionResult",
 ]

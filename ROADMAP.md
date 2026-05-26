@@ -65,18 +65,24 @@
 
 ---
 
-### Phase 4：LLM 驱动进化 ⏳ 下一步
+### Phase 4：LLM 驱动进化 + Sandbox 验证 ⏳ 进行中
 
-**目标：** Darwin 不再依赖人工决策，而是 LLM 自主分析 + 决策
+**目标：** Darwin 不再依赖人工决策，而是 LLM 自主分析 + 决策，变更必须经过沙箱验证
+
+**已实现：**
+- `SandboxManager` — 创建隔离的沙箱副本
+- `TestRunner` — 在沙箱中运行测试套件
+- `Promoter` — 测试通过后晋升到 production
+- 完整的 Sandbox 验证流程
 
 **计划：**
-- 给 Darwin 提供 `get_full_context_for_analysis()` 完整上下文
-- 驱动 LLM 分析：「我现在面临什么问题？应该怎么改进？」
-- LLM 生成 `EvolutionPlan`，然后走 Phase 2/3 的审批流程
-- Darwin 自己决定改 SOUL、加 skill、调参数、修 bug
+- [ ] 将 Sandbox 流程集成到 EvolutionEngine
+- [ ] LLM 分析上下文后生成 EvolutionPlan，自动进入沙箱验证
+- [ ] 人类 creator 审批流程确认
 
 **前置条件：**
 - [x] Phase 1-3 基础能力
+- [x] Sandbox 沙箱验证系统
 - [x] LLM API 配置完成
 - [ ] 人类 creator 审批流程确认
 

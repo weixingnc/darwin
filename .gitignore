@@ -25,6 +25,9 @@ evolution/checkpoints/
 evolution/proposals/          # 待审批的提案
 evolution/metrics/           # 自动调参数据
 evolution/fixes/             # 修 bug 尝试记录
+evolution/backups/           # 晋升前的备份
+evolution/promotions.jsonl    # 晋升历史
+.sandbox/                    # 沙箱环境（测试用）
 *.log
 
 # Test coverage
