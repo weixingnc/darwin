@@ -111,14 +111,19 @@
 
 ---
 
-### Phase 6：飞书集成 ⏳ 规划中
+### Phase 6：飞书集成 ⏳ 进行中
 
-**目标：** Darwin 能接收和发送飞书消息
+**目标：** Darwin 能通过 OpenClaw Gateway 接收和回复飞书消息
 
-**计划：**
-- [ ] 飞书 Bot 配置（app_id / app_secret）
-- [ ] 消息接收（Webhook 或 WebSocket）
-- [ ] 消息发送
+**已实现：**
+- [x] `FeishuAdapter` — 飞书消息适配器
+- [x] `on_feishu_message()` — 处理飞书消息并生成回复
+- [x] Darwin 作为 OpenClaw agent 注册接口
+
+**待实现：**
+- [ ] OpenClaw Gateway agent 注册
+- [ ] 消息路由配置
+- [ ] 群聊/私聊支持
 - [ ] 多飞书账号支持
 - [ ] 群聊 / 私聊区分
 
