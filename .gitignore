@@ -22,6 +22,7 @@ ENV/
 
 # Darwin specific
 evolution/checkpoints/
+evolution/proposals/          # 待审批的提案
 *.log
 
 # Test coverage

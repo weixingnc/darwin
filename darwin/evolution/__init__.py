@@ -4,6 +4,8 @@ from .engine import EvolutionEngine, EvolutionPlan, EvolutionResult, EvolutionPh
 from .checkpointer import Checkpointer, Checkpoint
 from .evaluator import Evaluator
 from .committer import Committer
+from .soul_editor import SoulEditor, SoulProposal, SoulChange, ConsistencyReport
+from .skill_builder import SkillBuilder, SkillProposal, SkillSpec
 
 __all__ = [
     "EvolutionEngine",
@@ -14,4 +16,11 @@ __all__ = [
     "Checkpoint",
     "Evaluator",
     "Committer",
+    "SoulEditor",
+    "SoulProposal",
+    "SoulChange",
+    "ConsistencyReport",
+    "SkillBuilder",
+    "SkillProposal",
+    "SkillSpec",
 ]
