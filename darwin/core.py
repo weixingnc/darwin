@@ -16,6 +16,9 @@ from typing import Optional
 from .perception import PerceptionModule, PerceptionType
 from .analyzer import AnalyzerModule, AnalysisResult
 from .evolution import EvolutionEngine
+from .self_improvement import ImprovementType
+from .ability_gap_detector import AbilityGapDetector, detect_ability_gaps
+from .skill_learner import SkillLearner, ChannelLearner, MigrationProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,10 @@ class DarwinCore:
         self.perception = PerceptionModule(self.darwin_root)
         self.analyzer = AnalyzerModule(self.darwin_root)
         self.evolution = EvolutionEngine(self.darwin_root)
+        # 自我完善模块
+        self.ability_detector = AbilityGapDetector(self.darwin_root, self.perception)
+        self.skill_learner = SkillLearner(self.darwin_root, self.perception, self.evolution)
+        self.channel_learner = ChannelLearner(self.darwin_root, self.perception, self.evolution)
 
         # 状态
         self.state = DarwinState.IDLE
@@ -68,6 +75,24 @@ class DarwinCore:
         # 如果启用了自动分析，立即分析
         if self.auto_evolve:
             self.analyze_and_evolve()
+
+    def on_master_request(self, request: str):
+        """当主人提出明确需求时调用（如"我想学数据分析"）"""
+        self.perception.perceive(
+            PerceptionType.MASTER_REQUEST,
+            request,
+            source="master",
+            context={},
+            importance=0.9,
+        )
+
+        # 尝试学习新技能
+        if self.auto_evolve:
+            plan = self.skill_learner.learn_from_master_request(request)
+            if plan:
+                logger.info(f"Master request detected: {request}, creating improvement plan")
+                # 执行改进计划
+                self.skill_learner.execute(plan)
 
     def on_master_feedback(self, feedback: str, sentiment: str = "neutral"):
         """当主人给出反馈时调用"""
