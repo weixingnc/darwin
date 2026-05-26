@@ -48,6 +48,52 @@ def version():
     click.echo(f"Darwin v{__version__}")
 
 
+@cli.command("init")
+@click.option("--non-interactive", is_flag=True, help="非交互模式（使用默认值）")
+@click.option("--reconfigure", is_flag=True, help="重新配置")
+def init(non_interactive: bool, reconfigure: bool):
+    """初始化 Darwin（首次运行需要）"""
+    from .init_wizard import run_wizard
+    from .config import ConfigManager, DEFAULT_CONFIG_DIR, DarwinConfig
+
+    if non_interactive:
+        print("非交互模式：创建默认配置")
+        config = DarwinConfig(darwin_root=Path(__file__).parent.parent)
+        manager = ConfigManager()
+        manager.save(config)
+        print(f"默认配置已保存到 {DEFAULT_CONFIG_DIR / 'config.yaml'}")
+        print("请编辑配置文件后运行 'darwin start'")
+        return
+
+    config = run_wizard()
+    if config is None:
+        sys.exit(1)
+
+
+@cli.command("start")
+@click.option("--profile", default="default", help="Darwin profile 名称")
+def start(profile: str):
+    """启动 Darwin"""
+    from .config import ConfigManager
+    from .agent.runtime import DarwinRuntime
+
+    manager = ConfigManager()
+    if not manager.exists():
+        print("未检测到配置，请先运行 'darwin init'")
+        sys.exit(1)
+
+    config = manager.load()
+    manager.print_config(config)
+
+    print("\n启动 Darwin...")
+    runtime = DarwinRuntime(config.darwin_root, profile=profile)
+    print(f"Darwin 已启动 (session: {runtime.session_id})")
+
+    # 临时：打印状态
+    status = runtime.get_status()
+    print(f"状态: {status}")
+
+
 @cli.group()
 def evolution():
     """进化引擎相关命令"""
