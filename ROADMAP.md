@@ -88,7 +88,42 @@
 
 ---
 
-### Phase 5：飞书集成 ⏳ 规划中
+### Phase 5：自我扩展沟通渠道 ⏳ 规划中
+
+**目标：** Darwin 能自主学习连接新的通信平台，不只是改代码，而是能扩展自己的连接能力
+
+**核心理念：**
+> 当前飞书是配置好的，未来 Darwin 应该能自己学会连接钉钉、企业微信、Telegram、Slack 等
+
+**计划：**
+- [ ] 定义 Channel Protocol — 统一接口（连接配置 → 测试连通性 → 启动监听）
+- [ ] Channel Discovery — Darwin 能发现系统支持哪些 channel
+- [ ] Auto-configure — 给定目标平台，Darwin 自己研究 API + 生成配置
+- [ ] 生成的 channel skill 经过沙箱验证后晋升到 production
+
+**进化示例：**
+```
+Darwin 意识到：「我想连接钉钉」
+    ↓
+自己研究钉钉 API 文档
+    ↓
+生成 DingTalk Channel Skill
+    ↓
+沙箱测试连通性
+    ↓
+晋升到 production
+    ↓
+「我会用钉钉了」
+```
+
+**前置条件：**
+- [x] Sandbox 验证系统
+- [ ] Channel Protocol 接口定义
+- [ ] LLM 具备 API 研究能力
+
+---
+
+### Phase 6：飞书集成 ⏳ 规划中
 
 **目标：** Darwin 能接收和发送飞书消息
 
@@ -101,7 +136,7 @@
 
 ---
 
-### Phase 6：Docker 部署 ⏳ 规划中
+### Phase 7：Docker 部署 ⏳ 规划中
 
 **目标：** Darwin 打包成一键运行的容器镜像
 
@@ -115,7 +150,7 @@
 
 ---
 
-### Phase 7：移动端 App ⏳ 规划中
+### Phase 8：移动端 App ⏳ 规划中
 
 **目标：** Darwin 运行在手机上
 
@@ -127,7 +162,7 @@
 
 ---
 
-### Phase 8：机器人预装 ⏳ 长期愿景
+### Phase 9：机器人预装 ⏳ 长期愿景
 
 **目标：** Darwin 预装在机器人 / 树莓派等嵌入式设备
 
