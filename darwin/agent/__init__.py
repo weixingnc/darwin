@@ -5,5 +5,6 @@ Darwin 的 Agent 模块封装了 Hermes AIAgent，
 """
 
 from .runtime import DarwinRuntime
+from .introspector import Introspector, DarwinSelfImage, SoulSnapshot, EvolutionRecord
 
-__all__ = ["DarwinRuntime"]
+__all__ = ["DarwinRuntime", "Introspector", "DarwinSelfImage", "SoulSnapshot", "EvolutionRecord"]

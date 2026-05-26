@@ -64,6 +64,11 @@ class DarwinRuntime:
             logger.warning(f"SOUL.md not found at {soul_file}")
 
         self.agent = AIAgent(**hermes_config)
+
+        # 初始化自省引擎
+        from darwin.agent.introspector import Introspector
+        self.introspector = Introspector(self.darwin_root)
+
         logger.info(f"DarwinRuntime initialized with profile: {profile}")
 
     def chat(self, message: str) -> str:
@@ -84,4 +89,5 @@ class DarwinRuntime:
             "darwin_root": str(self.darwin_root),
             "profile": self.profile,
             "session_id": self.session_id,
+            "self_image": self.introspector.get_self_image().__dict__,
         }
