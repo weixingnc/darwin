@@ -19,6 +19,7 @@ from .evolution import EvolutionEngine
 from .self_improvement import ImprovementType
 from .ability_gap_detector import AbilityGapDetector, detect_ability_gaps
 from .skill_learner import SkillLearner, ChannelLearner, MigrationProtocol
+from .knowledge_manager import KnowledgeManager, SoulEvolver, BodyControl
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,9 @@ class DarwinCore:
         self.ability_detector = AbilityGapDetector(self.darwin_root, self.perception)
         self.skill_learner = SkillLearner(self.darwin_root, self.perception, self.evolution)
         self.channel_learner = ChannelLearner(self.darwin_root, self.perception, self.evolution)
+        self.knowledge_manager = KnowledgeManager(self.darwin_root, self.perception)
+        self.soul_evolver = SoulEvolver(self.darwin_root, self.perception, self.evolution)
+        self.body_control = BodyControl(self.darwin_root, self.perception)
 
         # 状态
         self.state = DarwinState.IDLE

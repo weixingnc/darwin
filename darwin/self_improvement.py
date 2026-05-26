@@ -18,13 +18,15 @@ from .perception import PerceptionModule, PerceptionType
 logger = logging.getLogger(__name__)
 
 
-class ImprovementType(Enum):
+class ImprovementType(str, Enum):
     """改进类型"""
-    ABILITY_GAP = "ability_gap"      # 能力差距
-    SKILL_ACQUISITION = "skill_acquisition"  # 技能习得
-    CHANNEL_ACQUISITION = "channel_acquisition"  # 渠道扩展
-    KNOWLEDGE_GAP = "knowledge_gap"  # 知识差距
-    MIGRATION = "migration"          # 设备迁移
+    ABILITY_GAP = "ability_gap"               # 能力差距
+    SKILL_ACQUISITION = "skill_acquisition"   # 学习新技能
+    CHANNEL_ACQUISITION = "channel_acquisition"  # 学习新沟通渠道
+    KNOWLEDGE_ACQUISITION = "knowledge_acquisition"  # 学习新知识领域
+    SOUL_EVOLUTION = "soul_evolution"         # SOUL/性格进化
+    BODY_EXTENSION = "body_extension"         # 连接新硬件
+    MIGRATION = "migration"                  # 跨设备迁移
 
 
 @dataclass
