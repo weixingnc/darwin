@@ -188,6 +188,9 @@ class EvolutionEngine:
                 eval_report={"test_result": test_result.__dict__}
             )
 
+        # Bug fix: Mark sandbox as passed so Promoter gate can proceed
+        self.sandbox_manager._update_sandbox_status(sandbox_info.sandbox_id, "passed")
+
         # Phase 5: Promote to production (sandbox passed)
         logger.info(f"[{plan.id}] Phase 5: Promoting sandbox to production")
         plan.phase = EvolutionPhase.SANDBOX_PROMOTE

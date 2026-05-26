@@ -37,7 +37,7 @@ class Checkpointer:
 
     SNAPSHOT_PATHS = [
         "SOUL.md",
-        "src",
+        "darwin",  # Bug fix: was "src" (does not exist), actual dir is "darwin/"
     ]
 
     def __init__(self, checkpoint_dir: Path):
@@ -108,8 +108,8 @@ class Checkpointer:
             return False
 
         if target_root is None:
-            # 需要从 plan 中获取原始路径，这里简化处理
-            return False
+            # Bug fix: default to darwin_root instead of returning False
+            target_root = self.darwin_root
 
         try:
             for rel_path in self.SNAPSHOT_PATHS:
