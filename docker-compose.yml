@@ -1,0 +1,25 @@
+# Docker Compose for Darwin
+
+services:
+  darwin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: darwin-agent:latest
+    container_name: darwin
+    stdin_open: true    # -i
+    tty: true           # -t
+    volumes:
+      # 持久化配置
+      - ./data/.darwin:/root/.darwin
+      # 持久化 Darwin 项目（如果你需要修改代码）
+      - ./data/darwin:/app/darwin
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - darwin-net
+
+networks:
+  darwin-net:
+    driver: bridge

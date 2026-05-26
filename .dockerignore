@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Darwin runtime data (should persist via volumes)
+evolution/checkpoints/
+evolution/proposals/
+evolution/metrics/
+evolution/fixes/
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# README
+README.md
+SOUL.md.example
+
+# Docs
+*.md
+!LICENSE
