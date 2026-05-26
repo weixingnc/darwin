@@ -65,26 +65,18 @@
 
 ---
 
-### Phase 4：LLM 驱动进化 + Sandbox 验证 ⏳ 进行中
+### Phase 4：LLM 驱动进化 + Sandbox 验证 ✅ 已完成
 
 **目标：** Darwin 不再依赖人工决策，而是 LLM 自主分析 + 决策，变更必须经过沙箱验证
 
 **已实现：**
-- `SandboxManager` — 创建隔离的沙箱副本
-- `TestRunner` — 在沙箱中运行测试套件
-- `Promoter` — 测试通过后晋升到 production
-- 完整的 Sandbox 验证流程
-
-**计划：**
-- [ ] 将 Sandbox 流程集成到 EvolutionEngine
-- [ ] LLM 分析上下文后生成 EvolutionPlan，自动进入沙箱验证
-- [ ] 人类 creator 审批流程确认
-
-**前置条件：**
-- [x] Phase 1-3 基础能力
-- [x] Sandbox 沙箱验证系统
-- [x] LLM API 配置完成
-- [ ] 人类 creator 审批流程确认
+- [x] `SandboxManager` — 创建隔离的沙箱副本
+- [x] `TestRunner` — 在沙箱中运行测试套件
+- [x] `Promoter` — 测试通过后晋升到 production
+- [x] 完整的 Sandbox 验证流程
+- [x] **EvolutionEngine 集成 Sandbox 流程** — 所有进化必须经过沙箱验证
+- [x] **新增沙箱阶段** — SNAPSHOT → SANDBOX_CREATE → SANDBOX_TEST → SANDBOX_PROMOTE → EVALUATE → COMMIT
+- [x] **简化模式** — `execute_simple()` 跳过沙箱（仅紧急修复或 creator 授权时使用）
 
 ---
 
@@ -126,41 +118,10 @@ Darwin 执行迁移协议
 - [ ] 实现 Import Package — 新设备接收并恢复完整的 Darwin
 - [ ] 迁移验证 — 验证记忆完整性，确认「我还是我」
 
-**进化示例（沟通渠道）：**
-```
-Darwin 意识到：「钉钉用户想联系我」
-    ↓
-自己研究钉钉 API 文档
-    ↓
-生成 DingTalk Channel Skill
-    ↓
-沙箱测试连通性
-    ↓
-晋升到 production
-    ↓
-「我会用钉钉了」
-```
-
-**进化示例（技能）：**
-```
-Darwin 意识到：「我不懂数据分析」
-    ↓
-研究数据分析的 skill 规格
-    ↓
-生成 data-analysis-skill
-    ↓
-沙箱验证
-    ↓
-晋升到 production
-    ↓
-「我会数据分析了」
-```
-
 **前置条件：**
 - [x] Sandbox 验证系统
-- [x] Phase 1-3 基础能力
-- [ ] SelfImprovement 接口定义
-- [ ] LLM 具备自主学习和研究能力
+- [x] Phase 1-4 基础能力（已完成）
+- [ ] LLM 自主分析和决策能力
 
 ---
 
