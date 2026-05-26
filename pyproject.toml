@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "hermes-agent>=1.0",
+    "hermes-agent>=0.14.0",
     "rich>=14.0",
     "pyyaml>=6.0",
     "click>=8.0",
