@@ -6,8 +6,11 @@ from .evaluator import Evaluator
 from .committer import Committer
 from .soul_editor import SoulEditor, SoulProposal, SoulChange, ConsistencyReport
 from .skill_builder import SkillBuilder, SkillProposal, SkillSpec
+from .auto_tuner import AutoTuner, RuntimeMetrics, ParameterAdjustment, TUNABLE_PARAMS
+from .bug_fixer import BugFixer, BugReport, FixAttempt
 
 __all__ = [
+    # Core
     "EvolutionEngine",
     "EvolutionPlan",
     "EvolutionResult",
@@ -16,11 +19,22 @@ __all__ = [
     "Checkpoint",
     "Evaluator",
     "Committer",
+    # Soul editing
     "SoulEditor",
     "SoulProposal",
     "SoulChange",
     "ConsistencyReport",
+    # Skill building
     "SkillBuilder",
     "SkillProposal",
     "SkillSpec",
+    # Auto tuning
+    "AutoTuner",
+    "RuntimeMetrics",
+    "ParameterAdjustment",
+    "TUNABLE_PARAMS",
+    # Bug fixing
+    "BugFixer",
+    "BugReport",
+    "FixAttempt",
 ]
