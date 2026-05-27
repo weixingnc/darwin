@@ -2,14 +2,17 @@
 
 架构：
 - lark-oapi SDK 运行在独立线程，维护 WebSocket 长连接
-- 通过 asyncio.Queue 把消息从 SDK 线程传到主 event loop
+- 通过 threading.Queue 把消息从 SDK 线程传到主 event loop
 - Runtime 通过 set_message_handler() 接收消息
 """
 import asyncio
 import json
 import logging
+import queue
 import threading
 from typing import Any
+
+import requests
 
 from .base import ChannelAdapter, InboundMessage
 
@@ -28,7 +31,7 @@ class FeishuAdapter(ChannelAdapter):
         self._client: Any = None
         self._running = False
         self._ws_thread: threading.Thread | None = None
-        self._inbound_queue: asyncio.Queue[InboundMessage] = asyncio.Queue()
+        self._inbound_queue: queue.Queue[Any] = queue.Queue()
 
     async def connect(self) -> None:
         self._running = True
@@ -67,14 +70,16 @@ class FeishuAdapter(ChannelAdapter):
 
     async def _dispatch_loop(self) -> None:
         """从队列取消息，转发给 handler"""
+        loop = asyncio.get_event_loop()
         while self._running:
             try:
-                msg = await asyncio.wait_for(
-                    self._inbound_queue.get(),
-                    timeout=1.0
+                msg = await loop.run_in_executor(
+                    None, self._inbound_queue.get, True, 1.0
                 )
+                if msg is None:
+                    continue
                 await self._dispatch(msg)
-            except asyncio.TimeoutError:
+            except queue.Empty:
                 continue
             except Exception as e:
                 logger.error(f"[feishu] 派发消息异常: {e}")
@@ -92,17 +97,36 @@ class FeishuAdapter(ChannelAdapter):
         await loop.run_in_executor(None, self._send_sync, chat_id, content)
 
     def _send_sync(self, chat_id: str, content: str) -> None:
-        """同步发送（在 executor 中运行）"""
-        req = (
-            CreateMessageRequestBuilder()
-            .receive_id(chat_id)
-            .msg_type("text")
-            .content(json.dumps({"text": content}))
-            .build()
+        """同步发送消息（直接用 requests + tenant_access_token）"""
+        # 获取 token
+        token_resp = requests.post(
+            "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
+            json={"app_id": self.app_id, "app_secret": self.app_secret},
+            timeout=10,
         )
-        resp = self._client.im.v1.message.create(req)
-        if resp.code() != 0:
-            raise RuntimeError(f"[feishu] 发送失败: {resp.msg()}")
+        token_data = token_resp.json()
+        if token_data.get("code") != 0:
+            raise RuntimeError(f"[feishu] 获取 token 失败: {token_data}")
+        token = token_data["tenant_access_token"]
+
+        # 发送消息
+        resp = requests.post(
+            "https://open.feishu.cn/open-apis/im/v1/messages",
+            params={"receive_id_type": "chat_id"},
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "receive_id": chat_id,
+                "msg_type": "text",
+                "content": json.dumps({"text": content}),
+            },
+            timeout=10,
+        )
+        result = resp.json()
+        if result.get("code") != 0:
+            raise RuntimeError(f"[feishu] 发送失败: {result}")
 
     def _on_lark_message(self, data: Any) -> None:
         """SDK 事件回调（运行在 lark-oapi 线程）"""
@@ -142,10 +166,7 @@ class FeishuAdapter(ChannelAdapter):
 
             logger.info(f"[feishu] 收到消息: sender={sender_id} chat_id={getattr(msg_event, 'chat_id', '')} text={text[:50]}")
             # 放入队列（线程安全）
-            asyncio.run_coroutine_threadsafe(
-                self._inbound_queue.put(inbound),
-                asyncio.get_running_loop()
-            )
+            self._inbound_queue.put(inbound)
         except Exception as e:
             logger.error(f"[feishu] 解析消息异常: {e}")
 
@@ -155,10 +176,8 @@ class FeishuAdapter(ChannelAdapter):
 # 实际使用时通过 config.yaml 配置 appId/appSecret，gateway 在启动时检查
 # ---------------------------------------------------------------------------
 try:
-    from lark_oapi.api.im.v1 import CreateMessageRequestBuilder
     from lark_oapi.event.dispatcher_handler import EventDispatcherHandler
     from lark_oapi.ws.client import Client as LarkWSClient
 except ImportError:
     LarkWSClient = None
     EventDispatcherHandler = None
-    CreateMessageRequestBuilder = None
