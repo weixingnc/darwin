@@ -136,10 +136,7 @@ class EvolutionEngine:
         # Phase 2: Create sandbox
         logger.info(f"[{plan.id}] Phase 2: Creating sandbox")
         plan.phase = EvolutionPhase.SANDBOX_CREATE
-        sandbox_info = self.sandbox_manager.create_sandbox(
-            plan.description,
-            plan.changes,
-        )
+        sandbox_info = self.sandbox_manager.create_sandbox(plan.description)
         if not sandbox_info:
             self._rollback(plan)
             return EvolutionResult(
