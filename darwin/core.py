@@ -4,6 +4,7 @@
 这是 Darwin 的主循环，持续运行，感知环境，分析机会，执行进化。
 """
 
+import asyncio
 import logging
 import threading
 import time
@@ -20,8 +21,30 @@ from .self_improvement import ImprovementType
 from .ability_gap_detector import AbilityGapDetector, detect_ability_gaps
 from .skill_learner import SkillLearner, ChannelLearner, MigrationProtocol
 from .knowledge_manager import KnowledgeManager, SoulEvolver, BodyControl
+from .gateway.feishu import FeishuAdapter
 
 logger = logging.getLogger(__name__)
+
+
+def _load_feishu_adapter(darwin_root: Path, config: dict) -> FeishuAdapter | None:
+    """加载飞书适配器"""
+    feishu_cfg = config.get("feishu", {})
+    if not feishu_cfg.get("enabled"):
+        return None
+    if not feishu_cfg.get("app_id") or not feishu_cfg.get("app_secret"):
+        logger.warning("[feishu] enabled but app_id or app_secret missing, skipping")
+        return None
+
+    try:
+        adapter = FeishuAdapter(
+            app_id=feishu_cfg["app_id"],
+            app_secret=feishu_cfg["app_secret"],
+        )
+        logger.info(f"[feishu] adapter created for app_id={feishu_cfg['app_id'][:10]}...")
+        return adapter
+    except Exception as e:
+        logger.error(f"[feishu] failed to create adapter: {e}")
+        return None
 
 
 class DarwinState(Enum):
@@ -45,7 +68,7 @@ class DarwinCore:
 
     def __init__(self, darwin_root: Path, config: dict = None):
         self.darwin_root = Path(darwin_root).resolve()
-        self.config = config or {}
+        self.config = config or self._load_config()
 
         # 初始化模块
         self.perception = PerceptionModule(self.darwin_root)
@@ -59,6 +82,11 @@ class DarwinCore:
         self.soul_evolver = SoulEvolver(self.darwin_root, self.perception, self.evolution)
         self.body_control = BodyControl(self.darwin_root, self.perception)
 
+        # 飞书适配器
+        self.feishu = _load_feishu_adapter(self.darwin_root, self.config)
+        self._feishu_started = False
+        self._feishu_loop: asyncio.AbstractEventLoop | None = None
+
         # 状态
         self.state = DarwinState.IDLE
         self.running = False
@@ -67,6 +95,16 @@ class DarwinCore:
         # 配置
         self.analyze_interval = self.config.get("analyze_interval", 300)  # 分析间隔（秒）
         self.auto_evolve = self.config.get("auto_evolve", True)  # 自动进化
+
+    def _load_config(self) -> dict:
+        """从 ~/.darwin/config.yaml 加载配置"""
+        import yaml
+        config_file = Path.home() / ".darwin" / "config.yaml"
+        if config_file.exists():
+            with open(config_file) as f:
+                cfg = yaml.safe_load(f)
+                return cfg or {}
+        return {}
 
     # ──────────────────────────────────────────
     # 感知接口（供外部调用）
@@ -253,16 +291,70 @@ class DarwinCore:
             logger.warning("Darwin core already running")
             return
 
+        # 启动飞书适配器（独立线程运行 asyncio 事件循环）
+        if self.feishu:
+            self._start_feishu_in_thread()
+            # 等待 feishu 线程初始化事件循环
+            import time
+            for _ in range(50):
+                if self._feishu_loop is not None:
+                    break
+                time.sleep(0.1)
+            self._install_feishu_handler()
+            logger.info("Feishu adapter started")
+        else:
+            logger.info("Feishu not enabled, skipping")
+
         self.running = True
         self.thread = threading.Thread(target=self._run_loop, daemon=True)
         self.thread.start()
         logger.info("Darwin core started in background")
+
+    def _start_feishu_in_thread(self):
+        """在独立线程启动飞书 asyncio 事件循环"""
+        if self._feishu_started:
+            return
+
+        def feishu_loop():
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self._feishu_loop = loop
+            loop.run_until_complete(self.feishu.connect())
+            # connect() 启动 WS 线程后，保持事件循环运行
+            loop.run_forever()
+
+        thread = threading.Thread(target=feishu_loop, name="feishu-asyncio", daemon=True)
+        thread.start()
+        self._feishu_started = True
+
+    def _install_feishu_handler(self):
+        """安装飞书消息处理器"""
+        if not self.feishu or self._feishu_loop is None:
+            return
+
+        async def handler(msg):
+            logger.info(f"[feishu] message from {msg.sender_id}: {msg.content[:50]}")
+            self.on_master_message(msg.content)
+            # 直接回复
+            try:
+                await self.feishu.send(msg.chat_id, f"收到: {msg.content[:50]}")
+            except Exception as e:
+                logger.error(f"[feishu] 回复失败: {e}")
+
+        # set_message_handler 是同步方法，用 call_soon_threadsafe 安全调用
+        self._feishu_loop.call_soon_threadsafe(
+            self.feishu.set_message_handler, handler
+        )
 
     def stop(self):
         """停止 Darwin 核心循环"""
         self.running = False
         if self.thread:
             self.thread.join(timeout=5)
+        # 停止飞书事件循环
+        if self._feishu_loop and not self._feishu_loop.is_closed():
+            self._feishu_loop.call_soon_threadsafe(self._feishu_loop.stop)
         self.state = DarwinState.IDLE
         logger.info("Darwin core stopped")
 
